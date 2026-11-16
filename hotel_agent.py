@@ -69,3 +69,17 @@ async def time_it_async(label, methodToRun):
     return result
 
 
+class ToolProcessor:
+    def __init__(self):
+        # ThreadPoolExecutor could be used for complex implementations
+        self.tasks = {}
+        self.dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
+        self.guest_table = self.dynamodb.Table("Hotel_Guests")
+        self.reservation_table = self.dynamodb.Table("Hotel_Reservations")
+
+        try:
+            self.loop = asyncio.get_running_loop()
+        except RuntimeError:
+            self.loop = asyncio.get_event_loop()
+
+    
