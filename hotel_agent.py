@@ -765,200 +765,200 @@ class BedrockStreamManager:
     
                         traceback.print_exc()
     
-#         def add_audio_chunk(self, audio_bytes):
-#             """Add an audio chunk to the queue."""
-#             self.audio_input_queue.put_nowait(
-#                 {
-#                     "audio_bytes": audio_bytes,
-#                     "prompt_name": self.prompt_name,
-#                     "content_name": self.audio_content_name,
-#                 }
-#             )
+        def add_audio_chunk(self, audio_bytes):
+            """Add an audio chunk to the queue."""
+            self.audio_input_queue.put_nowait(
+                {
+                    "audio_bytes": audio_bytes,
+                    "prompt_name": self.prompt_name,
+                    "content_name": self.audio_content_name,
+                }
+            )
     
-#         async def send_audio_content_end_event(self):
-#             """Send a content end event to the Bedrock stream."""
-#             if not self.is_active:
-#                 debug_print("Stream is not active")
-#                 return
+        async def send_audio_content_end_event(self):
+            """Send a content end event to the Bedrock stream."""
+            if not self.is_active:
+                debug_print("Stream is not active")
+                return
     
-#             content_end_event = self.CONTENT_END_EVENT % (
-#                 self.prompt_name,
-#                 self.audio_content_name,
-#             )
-#             await self.send_raw_event(content_end_event)
-#             debug_print("Audio ended")
+            content_end_event = self.CONTENT_END_EVENT % (
+                self.prompt_name,
+                self.audio_content_name,
+            )
+            await self.send_raw_event(content_end_event)
+            debug_print("Audio ended")
     
-#         async def send_tool_start_event(self, content_name, tool_use_id):
-#             """Send a tool content start event to the Bedrock stream."""
-#             content_start_event = self.TOOL_CONTENT_START_EVENT % (
-#                 self.prompt_name,
-#                 content_name,
-#                 tool_use_id,
-#             )
-#             debug_print(f"Sending tool start event: {content_start_event}")
-#             await self.send_raw_event(content_start_event)
+        async def send_tool_start_event(self, content_name, tool_use_id):
+            """Send a tool content start event to the Bedrock stream."""
+            content_start_event = self.TOOL_CONTENT_START_EVENT % (
+                self.prompt_name,
+                content_name,
+                tool_use_id,
+            )
+            debug_print(f"Sending tool start event: {content_start_event}")
+            await self.send_raw_event(content_start_event)
     
-#         async def send_tool_result_event(self, content_name, tool_result):
-#             """Send a tool content event to the Bedrock stream."""
-#             # Use the actual tool result from processToolUse
-#             tool_result_event = self.tool_result_event(
-#                 content_name=content_name, content=tool_result, role="TOOL"
-#             )
-#             debug_print(f"Sending tool result event: {tool_result_event}")
-#             await self.send_raw_event(tool_result_event)
+        async def send_tool_result_event(self, content_name, tool_result):
+            """Send a tool content event to the Bedrock stream."""
+            # Use the actual tool result from processToolUse
+            tool_result_event = self.tool_result_event(
+                content_name=content_name, content=tool_result, role="TOOL"
+            )
+            debug_print(f"Sending tool result event: {tool_result_event}")
+            await self.send_raw_event(tool_result_event)
     
-#         async def send_tool_content_end_event(self, content_name):
-#             """Send a tool content end event to the Bedrock stream."""
-#             tool_content_end_event = self.CONTENT_END_EVENT % (
-#                 self.prompt_name,
-#                 content_name,
-#             )
-#             debug_print(f"Sending tool content event: {tool_content_end_event}")
-#             await self.send_raw_event(tool_content_end_event)
+        async def send_tool_content_end_event(self, content_name):
+            """Send a tool content end event to the Bedrock stream."""
+            tool_content_end_event = self.CONTENT_END_EVENT % (
+                self.prompt_name,
+                content_name,
+            )
+            debug_print(f"Sending tool content event: {tool_content_end_event}")
+            await self.send_raw_event(tool_content_end_event)
     
-#         async def send_prompt_end_event(self):
-#             """Close the stream and clean up resources."""
-#             if not self.is_active:
-#                 debug_print("Stream is not active")
-#                 return
+        async def send_prompt_end_event(self):
+            """Close the stream and clean up resources."""
+            if not self.is_active:
+                debug_print("Stream is not active")
+                return
     
-#             prompt_end_event = self.PROMPT_END_EVENT % (self.prompt_name)
-#             await self.send_raw_event(prompt_end_event)
-#             debug_print("Prompt ended")
+            prompt_end_event = self.PROMPT_END_EVENT % (self.prompt_name)
+            await self.send_raw_event(prompt_end_event)
+            debug_print("Prompt ended")
     
-#         async def send_session_end_event(self):
-#             """Send a session end event to the Bedrock stream."""
-#             if not self.is_active:
-#                 debug_print("Stream is not active")
-#                 return
+        async def send_session_end_event(self):
+            """Send a session end event to the Bedrock stream."""
+            if not self.is_active:
+                debug_print("Stream is not active")
+                return
     
-#             await self.send_raw_event(self.SESSION_END_EVENT)
-#             self.is_active = False
-#             debug_print("Session ended")
+            await self.send_raw_event(self.SESSION_END_EVENT)
+            self.is_active = False
+            debug_print("Session ended")
     
-#         async def _process_responses(self):
-#             """Process incoming responses from Bedrock."""
-#             try:
-#                 while self.is_active:
-#                     try:
-#                         output = await self.stream_response.await_output()
-#                         result = await output[1].receive()
-#                         if result.value and result.value.bytes_:
-#                             try:
-#                                 response_data = result.value.bytes_.decode("utf-8")
-#                                 json_data = json.loads(response_data)
+        async def _process_responses(self):
+            """Process incoming responses from Bedrock."""
+            try:
+                while self.is_active:
+                    try:
+                        output = await self.stream_response.await_output()
+                        result = await output[1].receive()
+                        if result.value and result.value.bytes_:
+                            try:
+                                response_data = result.value.bytes_.decode("utf-8")
+                                json_data = json.loads(response_data)
     
-#                                 # Handle different response types
-#                                 if "event" in json_data:
-#                                     if "completionStart" in json_data["event"]:
-#                                         debug_print(
-#                                             f"completionStart: {json_data['event']}"
-#                                         )
-#                                     elif "contentStart" in json_data["event"]:
-#                                         debug_print("Content start detected")
-#                                         content_start = json_data["event"]["contentStart"]
-#                                         # set role
-#                                         self.role = content_start["role"]
-#                                         # Check for speculative content
-#                                         if "additionalModelFields" in content_start:
-#                                             try:
-#                                                 additional_fields = json.loads(
-#                                                     content_start["additionalModelFields"]
-#                                                 )
-#                                                 if (
-#                                                     additional_fields.get("generationStage")
-#                                                     == "SPECULATIVE"
-#                                                 ):
-#                                                     debug_print(
-#                                                         "Speculative content detected"
-#                                                     )
-#                                                     self.display_assistant_text = True
-#                                                 else:
-#                                                     self.display_assistant_text = False
-#                                             except json.JSONDecodeError:
-#                                                 debug_print(
-#                                                     "Error parsing additionalModelFields"
-#                                                 )
-#                                     elif "textOutput" in json_data["event"]:
-#                                         text_content = json_data["event"]["textOutput"][
-#                                             "content"
-#                                         ]
-#                                         role = json_data["event"]["textOutput"]["role"]
-#                                         # Check if there is a barge-in
-#                                         if '{ "interrupted" : true }' in text_content:
-#                                             debug_print(
-#                                                 "Barge-in detected. Stopping audio output."
-#                                             )
-#                                             self.barge_in = True
+                                # Handle different response types
+                                if "event" in json_data:
+                                    if "completionStart" in json_data["event"]:
+                                        debug_print(
+                                            f"completionStart: {json_data['event']}"
+                                        )
+                                    elif "contentStart" in json_data["event"]:
+                                        debug_print("Content start detected")
+                                        content_start = json_data["event"]["contentStart"]
+                                        # set role
+                                        self.role = content_start["role"]
+                                        # Check for speculative content
+                                        if "additionalModelFields" in content_start:
+                                            try:
+                                                additional_fields = json.loads(
+                                                    content_start["additionalModelFields"]
+                                                )
+                                                if (
+                                                    additional_fields.get("generationStage")
+                                                    == "SPECULATIVE"
+                                                ):
+                                                    debug_print(
+                                                        "Speculative content detected"
+                                                    )
+                                                    self.display_assistant_text = True
+                                                else:
+                                                    self.display_assistant_text = False
+                                            except json.JSONDecodeError:
+                                                debug_print(
+                                                    "Error parsing additionalModelFields"
+                                                )
+                                    elif "textOutput" in json_data["event"]:
+                                        text_content = json_data["event"]["textOutput"][
+                                            "content"
+                                        ]
+                                        role = json_data["event"]["textOutput"]["role"]
+                                        # Check if there is a barge-in
+                                        if '{ "interrupted" : true }' in text_content:
+                                            debug_print(
+                                                "Barge-in detected. Stopping audio output."
+                                            )
+                                            self.barge_in = True
     
-#                                         if (
-#                                             self.role == "ASSISTANT"
-#                                             and self.display_assistant_text
-#                                         ):
-#                                             print(f"Assistant: {text_content}")
-#                                         elif self.role == "USER":
-#                                             print(f"User: {text_content}")
-#                                     elif "audioOutput" in json_data["event"]:
-#                                         audio_content = json_data["event"]["audioOutput"][
-#                                             "content"
-#                                         ]
-#                                         audio_bytes = base64.b64decode(audio_content)
-#                                         await self.audio_output_queue.put(audio_bytes)
-#                                     elif "toolUse" in json_data["event"]:
-#                                         self.toolUseContent = json_data["event"]["toolUse"]
-#                                         self.toolName = json_data["event"]["toolUse"][
-#                                             "toolName"
-#                                         ]
-#                                         self.toolUseId = json_data["event"]["toolUse"][
-#                                             "toolUseId"
-#                                         ]
-#                                         debug_print(
-#                                             f"Tool use detected: {self.toolName}, ID: {self.toolUseId}"
-#                                         )
-#                                     elif (
-#                                         "contentEnd" in json_data["event"]
-#                                         and json_data["event"]
-#                                         .get("contentEnd", {})
-#                                         .get("type")
-#                                         == "TOOL"
-#                                     ):
-#                                         debug_print(
-#                                             "Processing tool use and sending result"
-#                                         )
-#                                         # Start asynchronous tool processing - non-blocking
-#                                         self.handle_tool_request(
-#                                             self.toolName,
-#                                             self.toolUseContent,
-#                                             self.toolUseId,
-#                                         )
-#                                         debug_print("Processing tool use asynchronously")
-#                                     elif "contentEnd" in json_data["event"]:
-#                                         debug_print("Content end")
-#                                     elif "completionEnd" in json_data["event"]:
-#                                         # Handle end of conversation, no more response will be generated
-#                                         debug_print("End of response sequence")
-#                                     elif "usageEvent" in json_data["event"]:
-#                                         debug_print(f"UsageEvent: {json_data['event']}")
-#                                 # Put the response in the output queue for other components
-#                                 await self.output_queue.put(json_data)
-#                             except json.JSONDecodeError:
-#                                 await self.output_queue.put({"raw_data": response_data})
-#                     except StopAsyncIteration:
-#                         # Stream has ended
-#                         break
-#                     except Exception as e:
-#                         # Handle ValidationException properly
-#                         if "ValidationException" in str(e):
-#                             error_message = str(e)
-#                             print(f"Validation error: {error_message}")
-#                         else:
-#                             print(f"Error receiving response: {e}")
-#                         break
+                                        if (
+                                            self.role == "ASSISTANT"
+                                            and self.display_assistant_text
+                                        ):
+                                            print(f"Assistant: {text_content}")
+                                        elif self.role == "USER":
+                                            print(f"User: {text_content}")
+                                    elif "audioOutput" in json_data["event"]:
+                                        audio_content = json_data["event"]["audioOutput"][
+                                            "content"
+                                        ]
+                                        audio_bytes = base64.b64decode(audio_content)
+                                        await self.audio_output_queue.put(audio_bytes)
+                                    elif "toolUse" in json_data["event"]:
+                                        self.toolUseContent = json_data["event"]["toolUse"]
+                                        self.toolName = json_data["event"]["toolUse"][
+                                            "toolName"
+                                        ]
+                                        self.toolUseId = json_data["event"]["toolUse"][
+                                            "toolUseId"
+                                        ]
+                                        debug_print(
+                                            f"Tool use detected: {self.toolName}, ID: {self.toolUseId}"
+                                        )
+                                    elif (
+                                        "contentEnd" in json_data["event"]
+                                        and json_data["event"]
+                                        .get("contentEnd", {})
+                                        .get("type")
+                                        == "TOOL"
+                                    ):
+                                        debug_print(
+                                            "Processing tool use and sending result"
+                                        )
+                                        # Start asynchronous tool processing - non-blocking
+                                        self.handle_tool_request(
+                                            self.toolName,
+                                            self.toolUseContent,
+                                            self.toolUseId,
+                                        )
+                                        debug_print("Processing tool use asynchronously")
+                                    elif "contentEnd" in json_data["event"]:
+                                        debug_print("Content end")
+                                    elif "completionEnd" in json_data["event"]:
+                                        # Handle end of conversation, no more response will be generated
+                                        debug_print("End of response sequence")
+                                    elif "usageEvent" in json_data["event"]:
+                                        debug_print(f"UsageEvent: {json_data['event']}")
+                                # Put the response in the output queue for other components
+                                await self.output_queue.put(json_data)
+                            except json.JSONDecodeError:
+                                await self.output_queue.put({"raw_data": response_data})
+                    except StopAsyncIteration:
+                        # Stream has ended
+                        break
+                    except Exception as e:
+                        # Handle ValidationException properly
+                        if "ValidationException" in str(e):
+                            error_message = str(e)
+                            print(f"Validation error: {error_message}")
+                        else:
+                            print(f"Error receiving response: {e}")
+                        break
     
-#             except Exception as e:
-#                 print(f"Response processing error: {e}")
-#             finally:
-#                 self.is_active = False
+            except Exception as e:
+                print(f"Response processing error: {e}")
+            finally:
+                self.is_active = False
     
 #         def handle_tool_request(self, tool_name, tool_content, tool_use_id):
 #             """Handle a tool request asynchronously"""
