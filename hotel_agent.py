@@ -439,116 +439,116 @@ class BedrockStreamManager:
             }
         }"""
     
-#         def start_prompt(self):
-#             """Create a promptStart event"""
-#             guest_tool_schema = json.dumps(
-#                 {
-#                     "type": "object",
-#                     "properties": {
-#                         "guestName": {
-#                             "type": "string",
-#                             "description": "The full name of the hotel guest.",
-#                         }
-#                     },
-#                     "required": ["guestName"],
-#                 }
-#             )
+        def start_prompt(self):
+            """Create a promptStart event"""
+            guest_tool_schema = json.dumps(
+                {
+                    "type": "object",
+                    "properties": {
+                        "guestName": {
+                            "type": "string",
+                            "description": "The full name of the hotel guest.",
+                        }
+                    },
+                    "required": ["guestName"],
+                }
+            )
     
-#             reservation_tool_schema = json.dumps(
-#                 {
-#                     "type": "object",
-#                     "properties": {
-#                         "guestName": {
-#                             "type": "string",
-#                             "description": "The full name of the hotel guest.",
-#                         },
-#                         "includePastStays": {
-#                             "type": "boolean",
-#                             "description": "If true, also return past stays.",
-#                             "default": False,
-#                         },
-#                     },
-#                     "required": ["guestName"],
-#                 }
-#             )
+            reservation_tool_schema = json.dumps(
+                {
+                    "type": "object",
+                    "properties": {
+                        "guestName": {
+                            "type": "string",
+                            "description": "The full name of the hotel guest.",
+                        },
+                        "includePastStays": {
+                            "type": "boolean",
+                            "description": "If true, also return past stays.",
+                            "default": False,
+                        },
+                    },
+                    "required": ["guestName"],
+                }
+            )
     
-#             update_reservation_tool_schema = json.dumps(
-#                 {
-#                     "type": "object",
-#                     "properties": {
-#                         "reservationId": {
-#                             "type": "string",
-#                             "description": "The reservation ID to update (e.g., 'RES-1001').",
-#                         },
-#                         "newRoomType": {
-#                             "type": "string",
-#                             "description": "New room type to set (e.g., 'King Deluxe'). Optional.",
-#                         },
-#                         "newSpecialRequest": {
-#                             "type": "string",
-#                             "description": "A short note to append to specialRequests, e.g. 'Feather-free pillows'. Optional.",
-#                         },
-#                     },
-#                     "required": ["reservationId"],
-#                 }
-#             )
+            update_reservation_tool_schema = json.dumps(
+                {
+                    "type": "object",
+                    "properties": {
+                        "reservationId": {
+                            "type": "string",
+                            "description": "The reservation ID to update (e.g., 'RES-1001').",
+                        },
+                        "newRoomType": {
+                            "type": "string",
+                            "description": "New room type to set (e.g., 'King Deluxe'). Optional.",
+                        },
+                        "newSpecialRequest": {
+                            "type": "string",
+                            "description": "A short note to append to specialRequests, e.g. 'Feather-free pillows'. Optional.",
+                        },
+                    },
+                    "required": ["reservationId"],
+                }
+            )
     
-#             prompt_start_event = {
-#                 "event": {
-#                     "promptStart": {
-#                         "promptName": self.prompt_name,
-#                         "textOutputConfiguration": {"mediaType": "text/plain"},
-#                         "audioOutputConfiguration": {
-#                             "mediaType": "audio/lpcm",
-#                             "sampleRateHertz": 24000,
-#                             "sampleSizeBits": 16,
-#                             "channelCount": 1,
-#                             "voiceId": "matthew",
-#                             "encoding": "base64",
-#                             "audioType": "SPEECH",
-#                         },
-#                         "toolUseOutputConfiguration": {"mediaType": "application/json"},
-#                         "toolConfiguration": {
-#                             "tools": [
-#                                 {
-#                                     "toolSpec": {
-#                                         "name": "checkGuestProfileTool",
-#                                         "description": (
-#                                             "Use this tool to look up a hotel guest's profile in the hotel system. "
-#                                             "It returns DOB for identity verification, loyalty tier, and preferences."
-#                                         ),
-#                                         "inputSchema": {"json": guest_tool_schema},
-#                                     }
-#                                 },
-#                                 {
-#                                     "toolSpec": {
-#                                         "name": "checkReservationStatusTool",
-#                                         "description": (
-#                                             "Use this tool to check the guest's upcoming reservation and, optionally, past stays. "
-#                                             "Call this after verifying identity to answer questions about bookings or balances."
-#                                         ),
-#                                         "inputSchema": {"json": reservation_tool_schema},
-#                                     }
-#                                 },
-#                                 {
-#                                     "toolSpec": {
-#                                         "name": "updateReservationTool",
-#                                         "description": (
-#                                             "Use this tool to update an existing reservation's room type and/or add a special request. "
-#                                             "Only use it after the guest clearly confirms what they want to change."
-#                                         ),
-#                                         "inputSchema": {
-#                                             "json": update_reservation_tool_schema
-#                                         },
-#                                     }
-#                                 },
-#                             ]
-#                         },
-#                     }
-#                 }
-#             }
+            prompt_start_event = {
+                "event": {
+                    "promptStart": {
+                        "promptName": self.prompt_name,
+                        "textOutputConfiguration": {"mediaType": "text/plain"},
+                        "audioOutputConfiguration": {
+                            "mediaType": "audio/lpcm",
+                            "sampleRateHertz": 24000,
+                            "sampleSizeBits": 16,
+                            "channelCount": 1,
+                            "voiceId": "matthew",
+                            "encoding": "base64",
+                            "audioType": "SPEECH",
+                        },
+                        "toolUseOutputConfiguration": {"mediaType": "application/json"},
+                        "toolConfiguration": {
+                            "tools": [
+                                {
+                                    "toolSpec": {
+                                        "name": "checkGuestProfileTool",
+                                        "description": (
+                                            "Use this tool to look up a hotel guest's profile in the hotel system. "
+                                            "It returns DOB for identity verification, loyalty tier, and preferences."
+                                        ),
+                                        "inputSchema": {"json": guest_tool_schema},
+                                    }
+                                },
+                                {
+                                    "toolSpec": {
+                                        "name": "checkReservationStatusTool",
+                                        "description": (
+                                            "Use this tool to check the guest's upcoming reservation and, optionally, past stays. "
+                                            "Call this after verifying identity to answer questions about bookings or balances."
+                                        ),
+                                        "inputSchema": {"json": reservation_tool_schema},
+                                    }
+                                },
+                                {
+                                    "toolSpec": {
+                                        "name": "updateReservationTool",
+                                        "description": (
+                                            "Use this tool to update an existing reservation's room type and/or add a special request. "
+                                            "Only use it after the guest clearly confirms what they want to change."
+                                        ),
+                                        "inputSchema": {
+                                            "json": update_reservation_tool_schema
+                                        },
+                                    }
+                                },
+                            ]
+                        },
+                    }
+                }
+            }
     
-#             return json.dumps(prompt_start_event)
+            return json.dumps(prompt_start_event)
     
 #         def tool_result_event(self, content_name, content, role):
 #             """Create a tool result event"""
