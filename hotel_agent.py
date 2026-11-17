@@ -147,37 +147,37 @@ class ToolProcessor:
                 return {"error": f"Unsupported tool: {tool_name}"}
 
     #logique derriere l'execution     
-#     def _execute_check_guest(self, content_data):
-#             """
-#             Look up a guest profile in Hotel_Guests by guestName.
-#             Used for identity verification and preferences.
-#             """
-#             try:
-#                 guest_name = content_data.get("guestName")
-#                 if not guest_name:
-#                     return {"error": "guestName is required."}
+    def _execute_check_guest(self, content_data):
+            """
+            Look up a guest profile in Hotel_Guests by guestName.
+            Used for identity verification and preferences.
+            """
+            try:
+                guest_name = content_data.get("guestName")
+                if not guest_name:
+                    return {"error": "guestName is required."}
     
-#                 response = self.guest_table.get_item(Key={'guestName': guest_name})
+                response = self.guest_table.get_item(Key={'guestName': guest_name})
     
-#                 if 'Item' not in response:
-#                     return {"found": False, "message": "Guest not found."}
+                if 'Item' not in response:
+                    return {"found": False, "message": "Guest not found."}
     
-#                 item = response['Item']
+                item = response['Item']
     
-#                 return {
-#                     "found": True,
-#                     "guestName": item['guestName'],
-#                     "dob": item.get('dob'),
-#                     "loyaltyTier": item.get('loyaltyTier'),
-#                     "phoneNumber": item.get('phoneNumber'),
-#                     "email": item.get('email'),
-#                     "preferredLanguage": item.get('preferredLanguage'),
-#                     "preferredBedType": item.get('preferredBedType'),
-#                     "preferredView": item.get('preferredView'),
-#                     "vipFlag": bool(item.get('vipFlag', False))
-#                 }
-#             except Exception as e:
-#                 return {"error": str(e)}
+                return {
+                    "found": True,
+                    "guestName": item['guestName'],
+                    "dob": item.get('dob'),
+                    "loyaltyTier": item.get('loyaltyTier'),
+                    "phoneNumber": item.get('phoneNumber'),
+                    "email": item.get('email'),
+                    "preferredLanguage": item.get('preferredLanguage'),
+                    "preferredBedType": item.get('preferredBedType'),
+                    "preferredView": item.get('preferredView'),
+                    "vipFlag": bool(item.get('vipFlag', False))
+                }
+            except Exception as e:
+                return {"error": str(e)}
     
 #     def _execute_check_reservation_status(self, content_data):
 #             """
