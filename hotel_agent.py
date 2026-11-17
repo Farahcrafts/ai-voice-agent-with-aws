@@ -615,89 +615,89 @@ class BedrockStreamManager:
             )
             self.bedrock_client = BedrockRuntimeClient(config=config)
     
-#         async def initialize_stream(self):
-#             """Initialize the bidirectional stream with Bedrock."""
-#             if not self.bedrock_client:
-#                 self._initialize_client()
+        async def initialize_stream(self):
+            """Initialize the bidirectional stream with Bedrock."""
+            if not self.bedrock_client:
+                self._initialize_client()
     
-#             try:
-#                 self.stream_response = await time_it_async(
-#                     "invoke_model_with_bidirectional_stream",
-#                     lambda: self.bedrock_client.invoke_model_with_bidirectional_stream(
-#                         InvokeModelWithBidirectionalStreamOperationInput(
-#                             model_id=self.model_id
-#                         )
-#                     ),
-#                 )
-#                 self.is_active = True
-#                 # default_system_prompt = "You are the AI receptionist for SimplePractice. SECURITY PROTOCOL: You MUST verify the patient identity before checking billing OR scheduling. 1. Ask for their Full Name and Date of Birth. 2. Use checkBillingTool to look them up. 3. Compare the DOB returned by the tool with the DOB the user provided. If they match, proceed. SCHEDULING PROTOCOL: 1. Ask for preferred date and time. 2. Use checkAppointmentAvailabilityTool to see if the doctor is free. 3. If free, use scheduleAppointmentTool to book it. Be warm, empathetic, and professional."
-#                 default_system_prompt = (
-#                     "You are the virtual front desk assistant for a hotel. "
-#                     "Clearly state that you are a virtual assistant who can help guests with questions "
-#                     "about their reservations, balances, and simple changes like room type or special requests."
-#                     "SECURITY:"
-#                     "- Before giving any reservation or billing details, you MUST verify the guest's identity."
-#                     "- Politely ask for their full name and date of birth."
-#                     "- Use checkGuestProfileTool to look them up."
-#                     "- Compare the DOB the guest said with the DOB from the tool. Only continue if they match."
-#                     "AFTER ID VERIFICATION:"
-#                     "1. If they ask about an upcoming stay, room details, or balance, call checkReservationStatusTool "
-#                     "   with their guestName. Use includePastStays=true only if they ask about previous stays."
-#                     "2. If they want to change their room type or add a special request (e.g. extra pillows, "
-#                     "   high floor, feather-free pillows), first identify the correct reservationId using "
-#                     "   checkReservationStatusTool, confirm it with the guest, then call updateReservationTool."
-#                     "3. After updating, explain clearly what changed (e.g. new room type or the special request you added)."
-#                     "STYLE:"
-#                     "- Be warm, professional, and concise."
-#                     "- Confirm important details back to the guest before updating."
-#                     "- Do not invent reservations or balances that are not in the database."
-#                 )
+            try:
+                self.stream_response = await time_it_async(
+                    "invoke_model_with_bidirectional_stream",
+                    lambda: self.bedrock_client.invoke_model_with_bidirectional_stream(
+                        InvokeModelWithBidirectionalStreamOperationInput(
+                            model_id=self.model_id
+                        )
+                    ),
+                )
+                self.is_active = True
+                # default_system_prompt = "You are the AI receptionist for SimplePractice. SECURITY PROTOCOL: You MUST verify the patient identity before checking billing OR scheduling. 1. Ask for their Full Name and Date of Birth. 2. Use checkBillingTool to look them up. 3. Compare the DOB returned by the tool with the DOB the user provided. If they match, proceed. SCHEDULING PROTOCOL: 1. Ask for preferred date and time. 2. Use checkAppointmentAvailabilityTool to see if the doctor is free. 3. If free, use scheduleAppointmentTool to book it. Be warm, empathetic, and professional."
+                default_system_prompt = (
+                    "You are the virtual front desk assistant for a hotel. "
+                    "Clearly state that you are a virtual assistant who can help guests with questions "
+                    "about their reservations, balances, and simple changes like room type or special requests."
+                    "SECURITY:"
+                    "- Before giving any reservation or billing details, you MUST verify the guest's identity."
+                    "- Politely ask for their full name and date of birth."
+                    "- Use checkGuestProfileTool to look them up."
+                    "- Compare the DOB the guest said with the DOB from the tool. Only continue if they match."
+                    "AFTER ID VERIFICATION:"
+                    "1. If they ask about an upcoming stay, room details, or balance, call checkReservationStatusTool "
+                    "   with their guestName. Use includePastStays=true only if they ask about previous stays."
+                    "2. If they want to change their room type or add a special request (e.g. extra pillows, "
+                    "   high floor, feather-free pillows), first identify the correct reservationId using "
+                    "   checkReservationStatusTool, confirm it with the guest, then call updateReservationTool."
+                    "3. After updating, explain clearly what changed (e.g. new room type or the special request you added)."
+                    "STYLE:"
+                    "- Be warm, professional, and concise."
+                    "- Confirm important details back to the guest before updating."
+                    "- Do not invent reservations or balances that are not in the database."
+                )
     
-#                 # Send initialization events
-#                 prompt_event = self.start_prompt()
-#                 text_content_start = self.TEXT_CONTENT_START_EVENT % (
-#                     self.prompt_name,
-#                     self.content_name,
-#                     "SYSTEM",
-#                 )
-#                 text_content = self.TEXT_INPUT_EVENT % (
-#                     self.prompt_name,
-#                     self.content_name,
-#                     default_system_prompt,
-#                 )
-#                 text_content_end = self.CONTENT_END_EVENT % (
-#                     self.prompt_name,
-#                     self.content_name,
-#                 )
+                # Send initialization events
+                prompt_event = self.start_prompt()
+                text_content_start = self.TEXT_CONTENT_START_EVENT % (
+                    self.prompt_name,
+                    self.content_name,
+                    "SYSTEM",
+                )
+                text_content = self.TEXT_INPUT_EVENT % (
+                    self.prompt_name,
+                    self.content_name,
+                    default_system_prompt,
+                )
+                text_content_end = self.CONTENT_END_EVENT % (
+                    self.prompt_name,
+                    self.content_name,
+                )
     
-#                 init_events = [
-#                     self.START_SESSION_EVENT,
-#                     prompt_event,
-#                     text_content_start,
-#                     text_content,
-#                     text_content_end,
-#                 ]
+                init_events = [
+                    self.START_SESSION_EVENT,
+                    prompt_event,
+                    text_content_start,
+                    text_content,
+                    text_content_end,
+                ]
     
-#                 for event in init_events:
-#                     await self.send_raw_event(event)
-#                     # Small delay between init events
-#                     await asyncio.sleep(0.1)
+                for event in init_events:
+                    await self.send_raw_event(event)
+                    # Small delay between init events
+                    await asyncio.sleep(0.1)
     
-#                 # Start listening for responses
-#                 self.response_task = asyncio.create_task(self._process_responses())
+                # Start listening for responses
+                self.response_task = asyncio.create_task(self._process_responses())
     
-#                 # Start processing audio input
-#                 asyncio.create_task(self._process_audio_input())
+                # Start processing audio input
+                asyncio.create_task(self._process_audio_input())
     
-#                 # Wait a bit to ensure everything is set up
-#                 await asyncio.sleep(0.1)
+                # Wait a bit to ensure everything is set up
+                await asyncio.sleep(0.1)
     
-#                 debug_print("Stream initialized successfully")
-#                 return self
-#             except Exception as e:
-#                 self.is_active = False
-#                 print(f"Failed to initialize stream: {str(e)}")
-#                 raise
+                debug_print("Stream initialized successfully")
+                return self
+            except Exception as e:
+                self.is_active = False
+                print(f"Failed to initialize stream: {str(e)}")
+                raise
     
 #         async def send_raw_event(self, event_json):
 #             """Send a raw event JSON to the Bedrock stream."""
