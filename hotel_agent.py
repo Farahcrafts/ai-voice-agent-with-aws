@@ -255,75 +255,75 @@ class ToolProcessor:
             except Exception as e:
                 return {"error": str(e)}
     
-#     def _execute_update_reservation(self, content_data):
-#             """
-#             Update a reservation's room type and/or special requests in Hotel_Reservations.
-#             - reservationId: required
-#             - newRoomType: optional string
-#             - newSpecialRequest: optional string (appended to specialRequests list)
-#             """
-#             try:
-#                 reservation_id = content_data.get("reservationId")
-#                 new_room_type = content_data.get("newRoomType")
-#                 new_special_request = content_data.get("newSpecialRequest")
+    def _execute_update_reservation(self, content_data):
+            """
+            Update a reservation's room type and/or special requests in Hotel_Reservations.
+            - reservationId: required
+            - newRoomType: optional string
+            - newSpecialRequest: optional string (appended to specialRequests list)
+            """
+            try:
+                reservation_id = content_data.get("reservationId")
+                new_room_type = content_data.get("newRoomType")
+                new_special_request = content_data.get("newSpecialRequest")
     
-#                 if not reservation_id:
-#                     return {"error": "reservationId is required."}
+                if not reservation_id:
+                    return {"error": "reservationId is required."}
     
-#                 # Build dynamic update expression
-#                 update_parts = []
-#                 expr_values = {}
+                # Build dynamic update expression
+                update_parts = []
+                expr_values = {}
     
-#                 if new_room_type:
-#                     update_parts.append("roomType = :rt")
-#                     expr_values[":rt"] = new_room_type
+                if new_room_type:
+                    update_parts.append("roomType = :rt")
+                    expr_values[":rt"] = new_room_type
     
-#                 if new_special_request:
-#                     update_parts.append(
-#                         "specialRequests = list_append("
-#                         "if_not_exists(specialRequests, :empty_list), :sr)"
-#                     )
-#                     expr_values[":sr"] = [new_special_request]
-#                     expr_values[":empty_list"] = []
+                if new_special_request:
+                    update_parts.append(
+                        "specialRequests = list_append("
+                        "if_not_exists(specialRequests, :empty_list), :sr)"
+                    )
+                    expr_values[":sr"] = [new_special_request]
+                    expr_values[":empty_list"] = []
     
-#                 if not update_parts:
-#                     return {
-#                         "error": "Nothing to update. Provide newRoomType and/or newSpecialRequest."
-#                     }
+                if not update_parts:
+                    return {
+                        "error": "Nothing to update. Provide newRoomType and/or newSpecialRequest."
+                    }
     
-#                 update_expression = "SET " + ", ".join(update_parts)
+                update_expression = "SET " + ", ".join(update_parts)
     
-#                 # Apply update
-#                 self.reservation_table.update_item(
-#                     Key={'reservationId': reservation_id},
-#                     UpdateExpression=update_expression,
-#                     ExpressionAttributeValues=expr_values
-#                 )
+                # Apply update
+                self.reservation_table.update_item(
+                    Key={'reservationId': reservation_id},
+                    UpdateExpression=update_expression,
+                    ExpressionAttributeValues=expr_values
+                )
     
-#                 # Fetch updated reservation to return full context
-#                 response = self.reservation_table.get_item(
-#                     Key={'reservationId': reservation_id}
-#                 )
-#                 updated_item = response.get("Item", {})
+                # Fetch updated reservation to return full context
+                response = self.reservation_table.get_item(
+                    Key={'reservationId': reservation_id}
+                )
+                updated_item = response.get("Item", {})
     
-#                 # Convert Decimal to string for balanceDue if present
-#                 if 'balanceDue' in updated_item and isinstance(updated_item['balanceDue'], Decimal):
-#                     updated_item['balanceDue'] = str(updated_item['balanceDue'])
+                # Convert Decimal to string for balanceDue if present
+                if 'balanceDue' in updated_item and isinstance(updated_item['balanceDue'], Decimal):
+                    updated_item['balanceDue'] = str(updated_item['balanceDue'])
     
-#                 msg_parts = [f"Reservation {reservation_id} has been updated."]
-#                 if new_room_type:
-#                     msg_parts.append(f"New room type: {new_room_type}.")
-#                 if new_special_request:
-#                     msg_parts.append(f"Added special request: '{new_special_request}'.")
+                msg_parts = [f"Reservation {reservation_id} has been updated."]
+                if new_room_type:
+                    msg_parts.append(f"New room type: {new_room_type}.")
+                if new_special_request:
+                    msg_parts.append(f"Added special request: '{new_special_request}'.")
     
-#                 return {
-#                     "success": True,
-#                     "message": " ".join(msg_parts),
-#                     "updatedReservation": updated_item
-#                 }
+                return {
+                    "success": True,
+                    "message": " ".join(msg_parts),
+                    "updatedReservation": updated_item
+                }
     
-#             except Exception as e:
-#                 return {"error": str(e)}
+            except Exception as e:
+                return {"error": str(e)}
 
 # ################################################################################################
 # class BedrockStreamManager:
