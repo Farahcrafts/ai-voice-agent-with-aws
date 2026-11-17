@@ -960,67 +960,67 @@ class BedrockStreamManager:
             finally:
                 self.is_active = False
     
-#         def handle_tool_request(self, tool_name, tool_content, tool_use_id):
-#             """Handle a tool request asynchronously"""
-#             # Create a unique content name for this tool response
-#             tool_content_name = str(uuid.uuid4())
+        def handle_tool_request(self, tool_name, tool_content, tool_use_id):
+            """Handle a tool request asynchronously"""
+            # Create a unique content name for this tool response
+            tool_content_name = str(uuid.uuid4())
     
-#             # Create an asynchronous task for the tool execution
-#             task = asyncio.create_task(
-#                 self._execute_tool_and_send_result(
-#                     tool_name, tool_content, tool_use_id, tool_content_name
-#                 )
-#             )
+            # Create an asynchronous task for the tool execution
+            task = asyncio.create_task(
+                self._execute_tool_and_send_result(
+                    tool_name, tool_content, tool_use_id, tool_content_name
+                )
+            )
     
-#             # Store the task
-#             self.pending_tool_tasks[tool_content_name] = task
+            # Store the task
+            self.pending_tool_tasks[tool_content_name] = task
     
-#             # Add error handling
-#             task.add_done_callback(
-#                 lambda t: self._handle_tool_task_completion(t, tool_content_name)
-#             )
+            # Add error handling
+            task.add_done_callback(
+                lambda t: self._handle_tool_task_completion(t, tool_content_name)
+            )
     
-#         def _handle_tool_task_completion(self, task, content_name):
-#             """Handle the completion of a tool task"""
-#             # Remove task from pending tasks
-#             if content_name in self.pending_tool_tasks:
-#                 del self.pending_tool_tasks[content_name]
+        def _handle_tool_task_completion(self, task, content_name):
+            """Handle the completion of a tool task"""
+            # Remove task from pending tasks
+            if content_name in self.pending_tool_tasks:
+                del self.pending_tool_tasks[content_name]
     
-#             # Handle any exceptions
-#             if task.done() and not task.cancelled():
-#                 exception = task.exception()
-#                 if exception:
-#                     debug_print(f"Tool task failed: {str(exception)}")
+            # Handle any exceptions
+            if task.done() and not task.cancelled():
+                exception = task.exception()
+                if exception:
+                    debug_print(f"Tool task failed: {str(exception)}")
     
-#         async def _execute_tool_and_send_result(
-#             self, tool_name, tool_content, tool_use_id, content_name
-#         ):
-#             """Execute a tool and send the result"""
-#             try:
-#                 debug_print(f"Starting tool execution: {tool_name}")
+        async def _execute_tool_and_send_result(
+            self, tool_name, tool_content, tool_use_id, content_name
+        ):
+            """Execute a tool and send the result"""
+            try:
+                debug_print(f"Starting tool execution: {tool_name}")
     
-#                 # Process the tool - this doesn't block the event loop
-#                 tool_result = await self.tool_processor.process_tool_async(
-#                     tool_name, tool_content
-#                 )
+                # Process the tool - this doesn't block the event loop
+                tool_result = await self.tool_processor.process_tool_async(
+                    tool_name, tool_content
+                )
     
-#                 # Send the result sequence
-#                 await self.send_tool_start_event(content_name, tool_use_id)
-#                 await self.send_tool_result_event(content_name, tool_result)
-#                 await self.send_tool_content_end_event(content_name)
+                # Send the result sequence
+                await self.send_tool_start_event(content_name, tool_use_id)
+                await self.send_tool_result_event(content_name, tool_result)
+                await self.send_tool_content_end_event(content_name)
     
-#                 debug_print(f"Tool execution complete: {tool_name}")
-#             except Exception as e:
-#                 debug_print(f"Error executing tool {tool_name}: {str(e)}")
-#                 # Try to send an error response if possible
-#                 try:
-#                     error_result = {"error": f"Tool execution failed: {str(e)}"}
+                debug_print(f"Tool execution complete: {tool_name}")
+            except Exception as e:
+                debug_print(f"Error executing tool {tool_name}: {str(e)}")
+                # Try to send an error response if possible
+                try:
+                    error_result = {"error": f"Tool execution failed: {str(e)}"}
     
-#                     await self.send_tool_start_event(content_name, tool_use_id)
-#                     await self.send_tool_result_event(content_name, error_result)
-#                     await self.send_tool_content_end_event(content_name)
-#                 except Exception as send_error:
-#                     debug_print(f"Failed to send error response: {str(send_error)}")
+                    await self.send_tool_start_event(content_name, tool_use_id)
+                    await self.send_tool_result_event(content_name, error_result)
+                    await self.send_tool_content_end_event(content_name)
+                except Exception as send_error:
+                    debug_print(f"Failed to send error response: {str(send_error)}")
     
 #         async def close(self):
 #             """Close the stream properly."""
