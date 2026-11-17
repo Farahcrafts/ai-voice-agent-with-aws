@@ -1022,24 +1022,24 @@ class BedrockStreamManager:
                 except Exception as send_error:
                     debug_print(f"Failed to send error response: {str(send_error)}")
     
-#         async def close(self):
-#             """Close the stream properly."""
-#             if not self.is_active:
-#                 return
+        async def close(self):
+            """Close the stream properly."""
+            if not self.is_active:
+                return
     
-#             # Cancel any pending tool tasks
-#             for task in self.pending_tool_tasks.values():
-#                 task.cancel()
+            # Cancel any pending tool tasks
+            for task in self.pending_tool_tasks.values():
+                task.cancel()
     
-#             if self.response_task and not self.response_task.done():
-#                 self.response_task.cancel()
+            if self.response_task and not self.response_task.done():
+                self.response_task.cancel()
     
-#             await self.send_audio_content_end_event()
-#             await self.send_prompt_end_event()
-#             await self.send_session_end_event()
+            await self.send_audio_content_end_event()
+            await self.send_prompt_end_event()
+            await self.send_session_end_event()
     
-#             if self.stream_response:
-#                 await self.stream_response.input_stream.close()
+            if self.stream_response:
+                await self.stream_response.input_stream.close()
 
 # ################################################################################################
 # class AudioStreamer:
