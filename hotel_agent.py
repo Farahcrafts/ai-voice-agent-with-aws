@@ -725,45 +725,45 @@ class BedrockStreamManager:
     
                     traceback.print_exc()
     
-#         async def send_audio_content_start_event(self):
-#             """Send a content start event to the Bedrock stream."""
-#             content_start_event = self.CONTENT_START_EVENT % (
-#                 self.prompt_name,
-#                 self.audio_content_name,
-#             )
-#             await self.send_raw_event(content_start_event)
+        async def send_audio_content_start_event(self):
+            """Send a content start event to the Bedrock stream."""
+            content_start_event = self.CONTENT_START_EVENT % (
+                self.prompt_name,
+                self.audio_content_name,
+            )
+            await self.send_raw_event(content_start_event)
     
-#         async def _process_audio_input(self):
-#             """Process audio input from the queue and send to Bedrock."""
-#             while self.is_active:
-#                 try:
-#                     # Get audio data from the queue
-#                     data = await self.audio_input_queue.get()
+        async def _process_audio_input(self):
+            """Process audio input from the queue and send to Bedrock."""
+            while self.is_active:
+                try:
+                    # Get audio data from the queue
+                    data = await self.audio_input_queue.get()
     
-#                     audio_bytes = data.get("audio_bytes")
-#                     if not audio_bytes:
-#                         debug_print("No audio bytes received")
-#                         continue
+                    audio_bytes = data.get("audio_bytes")
+                    if not audio_bytes:
+                        debug_print("No audio bytes received")
+                        continue
     
-#                     # Base64 encode the audio data
-#                     blob = base64.b64encode(audio_bytes)
-#                     audio_event = self.AUDIO_EVENT_TEMPLATE % (
-#                         self.prompt_name,
-#                         self.audio_content_name,
-#                         blob.decode("utf-8"),
-#                     )
+                    # Base64 encode the audio data
+                    blob = base64.b64encode(audio_bytes)
+                    audio_event = self.AUDIO_EVENT_TEMPLATE % (
+                        self.prompt_name,
+                        self.audio_content_name,
+                        blob.decode("utf-8"),
+                    )
     
-#                     # Send the event
-#                     await self.send_raw_event(audio_event)
+                    # Send the event
+                    await self.send_raw_event(audio_event)
     
-#                 except asyncio.CancelledError:
-#                     break
-#                 except Exception as e:
-#                     debug_print(f"Error processing audio: {e}")
-#                     if DEBUG:
-#                         import traceback
+                except asyncio.CancelledError:
+                    break
+                except Exception as e:
+                    debug_print(f"Error processing audio: {e}")
+                    if DEBUG:
+                        import traceback
     
-#                         traceback.print_exc()
+                        traceback.print_exc()
     
 #         def add_audio_chunk(self, audio_bytes):
 #             """Add an audio chunk to the queue."""
