@@ -699,31 +699,31 @@ class BedrockStreamManager:
                 print(f"Failed to initialize stream: {str(e)}")
                 raise
     
-#         async def send_raw_event(self, event_json):
-#             """Send a raw event JSON to the Bedrock stream."""
-#             if not self.stream_response or not self.is_active:
-#                 debug_print("Stream not initialized or closed")
-#                 return
+        async def send_raw_event(self, event_json):
+            """Send a raw event JSON to the Bedrock stream."""
+            if not self.stream_response or not self.is_active:
+                debug_print("Stream not initialized or closed")
+                return
     
-#             event = InvokeModelWithBidirectionalStreamInputChunk(
-#                 value=BidirectionalInputPayloadPart(bytes_=event_json.encode("utf-8"))
-#             )
+            event = InvokeModelWithBidirectionalStreamInputChunk(
+                value=BidirectionalInputPayloadPart(bytes_=event_json.encode("utf-8"))
+            )
     
-#             try:
-#                 await self.stream_response.input_stream.send(event)
-#                 # For debugging large events, you might want to log just the type
-#                 if DEBUG:
-#                     if len(event_json) > 200:
-#                         event_type = json.loads(event_json).get("event", {}).keys()
-#                         debug_print(f"Sent event type: {list(event_type)}")
-#                     else:
-#                         debug_print(f"Sent event: {event_json}")
-#             except Exception as e:
-#                 debug_print(f"Error sending event: {str(e)}")
-#                 if DEBUG:
-#                     import traceback
+            try:
+                await self.stream_response.input_stream.send(event)
+                # For debugging large events, you might want to log just the type
+                if DEBUG:
+                    if len(event_json) > 200:
+                        event_type = json.loads(event_json).get("event", {}).keys()
+                        debug_print(f"Sent event type: {list(event_type)}")
+                    else:
+                        debug_print(f"Sent event: {event_json}")
+            except Exception as e:
+                debug_print(f"Error sending event: {str(e)}")
+                if DEBUG:
+                    import traceback
     
-#                     traceback.print_exc()
+                    traceback.print_exc()
     
 #         async def send_audio_content_start_event(self):
 #             """Send a content start event to the Bedrock stream."""
