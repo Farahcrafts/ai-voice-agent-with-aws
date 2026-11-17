@@ -569,42 +569,42 @@ class BedrockStreamManager:
             }
             return json.dumps(tool_result_event)
     
-#         def __init__(self, model_id="amazon.nova-sonic-v1:0", region="us-east-1"):
-#             """Initialize the stream manager."""
-#             self.model_id = model_id
-#             self.region = region
+        def __init__(self, model_id="amazon.nova-sonic-v1:0", region="us-east-1"):
+            """Initialize the stream manager."""
+            self.model_id = model_id
+            self.region = region
     
-#             # Replace RxPy subjects with asyncio queues
-#             self.audio_input_queue = asyncio.Queue()
-#             self.audio_output_queue = asyncio.Queue()
-#             self.output_queue = asyncio.Queue()
+            # Replace RxPy subjects with asyncio queues
+            self.audio_input_queue = asyncio.Queue()
+            self.audio_output_queue = asyncio.Queue()
+            self.output_queue = asyncio.Queue()
     
-#             self.response_task = None
-#             self.stream_response = None
-#             self.is_active = False
-#             self.barge_in = False
-#             self.bedrock_client = None
+            self.response_task = None
+            self.stream_response = None
+            self.is_active = False
+            self.barge_in = False
+            self.bedrock_client = None
     
-#             # Audio playback components
-#             self.audio_player = None
+            # Audio playback components
+            self.audio_player = None
     
-#             # Text response components
-#             self.display_assistant_text = False
-#             self.role = None
+            # Text response components
+            self.display_assistant_text = False
+            self.role = None
     
-#             # Session information
-#             self.prompt_name = str(uuid.uuid4())
-#             self.content_name = str(uuid.uuid4())
-#             self.audio_content_name = str(uuid.uuid4())
-#             self.toolUseContent = ""
-#             self.toolUseId = ""
-#             self.toolName = ""
+            # Session information
+            self.prompt_name = str(uuid.uuid4())
+            self.content_name = str(uuid.uuid4())
+            self.audio_content_name = str(uuid.uuid4())
+            self.toolUseContent = ""
+            self.toolUseId = ""
+            self.toolName = ""
     
-#             # Add a tool processor
-#             self.tool_processor = ToolProcessor()
+            # Add a tool processor
+            self.tool_processor = ToolProcessor()
     
-#             # Add tracking for in-progress tool calls
-#             self.pending_tool_tasks = {}
+            # Add tracking for in-progress tool calls
+            self.pending_tool_tasks = {}
     
 #         def _initialize_client(self):
 #             """Initialize the Bedrock client."""
