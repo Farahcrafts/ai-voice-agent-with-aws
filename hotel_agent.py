@@ -550,24 +550,24 @@ class BedrockStreamManager:
     
             return json.dumps(prompt_start_event)
     
-#         def tool_result_event(self, content_name, content, role):
-#             """Create a tool result event"""
+        def tool_result_event(self, content_name, content, role):
+            """Create a tool result event"""
     
-#             if isinstance(content, dict):
-#                 content_json_string = json.dumps(content)
-#             else:
-#                 content_json_string = content
+            if isinstance(content, dict):
+                content_json_string = json.dumps(content)
+            else:
+                content_json_string = content
     
-#             tool_result_event = {
-#                 "event": {
-#                     "toolResult": {
-#                         "promptName": self.prompt_name,
-#                         "contentName": content_name,
-#                         "content": content_json_string,
-#                     }
-#                 }
-#             }
-#             return json.dumps(tool_result_event)
+            tool_result_event = {
+                "event": {
+                    "toolResult": {
+                        "promptName": self.prompt_name,
+                        "contentName": content_name,
+                        "content": content_json_string,
+                    }
+                }
+            }
+            return json.dumps(tool_result_event)
     
 #         def __init__(self, model_id="amazon.nova-sonic-v1:0", region="us-east-1"):
 #             """Initialize the stream manager."""
