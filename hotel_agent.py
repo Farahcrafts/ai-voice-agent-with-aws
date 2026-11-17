@@ -179,81 +179,81 @@ class ToolProcessor:
             except Exception as e:
                 return {"error": str(e)}
     
-#     def _execute_check_reservation_status(self, content_data):
-#             """
-#             Check upcoming and (optionally) past reservations in Hotel_Reservations
-#             for a given guest.
-#             """
-#             try:
-#                 from boto3.dynamodb.conditions import Attr
-#                 import datetime as _dt
+    def _execute_check_reservation_status(self, content_data):
+            """
+            Check upcoming and (optionally) past reservations in Hotel_Reservations
+            for a given guest.
+            """
+            try:
+                from boto3.dynamodb.conditions import Attr
+                import datetime as _dt
     
-#                 guest_name = content_data.get("guestName")
-#                 include_past = content_data.get("includePastStays", False)
+                guest_name = content_data.get("guestName")
+                include_past = content_data.get("includePastStays", False)
     
-#                 if not guest_name:
-#                     return {"error": "guestName is required."}
+                if not guest_name:
+                    return {"error": "guestName is required."}
     
-#                 today_str = _dt.date.today().strftime('%Y-%m-%d')
+                today_str = _dt.date.today().strftime('%Y-%m-%d')
     
-#                 # Find all reservations for this guest
-#                 filter_expression = Attr('guestName').eq(guest_name)
-#                 response = self.reservation_table.scan(FilterExpression=filter_expression)
-#                 items = response.get('Items', [])
+                # Find all reservations for this guest
+                filter_expression = Attr('guestName').eq(guest_name)
+                response = self.reservation_table.scan(FilterExpression=filter_expression)
+                items = response.get('Items', [])
     
-#                 if not items:
-#                     return {
-#                         "found": False,
-#                         "message": "No reservations found for this guest."
-#                     }
+                if not items:
+                    return {
+                        "found": False,
+                        "message": "No reservations found for this guest."
+                    }
     
-#                 # Separate upcoming/current vs past stays
-#                 upcoming = []
-#                 past = []
+                # Separate upcoming/current vs past stays
+                upcoming = []
+                past = []
     
-#                 for r in items:
-#                     check_out = r.get('checkOutDate', '')
-#                     status = r.get('status', '')
-#                     # Normalize Decimal -> string for balanceDue
-#                     if 'balanceDue' in r and isinstance(r['balanceDue'], Decimal):
-#                         r['balanceDue'] = str(r['balanceDue'])
+                for r in items:
+                    check_out = r.get('checkOutDate', '')
+                    status = r.get('status', '')
+                    # Normalize Decimal -> string for balanceDue
+                    if 'balanceDue' in r and isinstance(r['balanceDue'], Decimal):
+                        r['balanceDue'] = str(r['balanceDue'])
     
-#                     if check_out >= today_str and status in ["Confirmed", "CheckedIn"]:
-#                         upcoming.append(r)
-#                     else:
-#                         past.append(r)
+                    if check_out >= today_str and status in ["Confirmed", "CheckedIn"]:
+                        upcoming.append(r)
+                    else:
+                        past.append(r)
     
-#                 # Sort upcoming by checkInDate
-#                 upcoming.sort(key=lambda x: x.get('checkInDate', '9999-99-99'))
+                # Sort upcoming by checkInDate
+                upcoming.sort(key=lambda x: x.get('checkInDate', '9999-99-99'))
     
-#                 upcoming_res = upcoming[0] if upcoming else None
-#                 past_stays = past if include_past else []
+                upcoming_res = upcoming[0] if upcoming else None
+                past_stays = past if include_past else []
     
-#                 message_parts = []
-#                 if upcoming_res:
-#                     msg = (
-#                         f"You have an upcoming stay in room {upcoming_res.get('roomNumber')} "
-#                         f"({upcoming_res.get('roomType')}) from "
-#                         f"{upcoming_res.get('checkInDate')} to {upcoming_res.get('checkOutDate')}."
-#                     )
-#                     if upcoming_res.get('paymentStatus') != "Paid":
-#                         msg += f" Your current balance due is {upcoming_res.get('balanceDue', '0.00')}."
-#                     message_parts.append(msg)
-#                 else:
-#                     message_parts.append("You have no upcoming reservations.")
+                message_parts = []
+                if upcoming_res:
+                    msg = (
+                        f"You have an upcoming stay in room {upcoming_res.get('roomNumber')} "
+                        f"({upcoming_res.get('roomType')}) from "
+                        f"{upcoming_res.get('checkInDate')} to {upcoming_res.get('checkOutDate')}."
+                    )
+                    if upcoming_res.get('paymentStatus') != "Paid":
+                        msg += f" Your current balance due is {upcoming_res.get('balanceDue', '0.00')}."
+                    message_parts.append(msg)
+                else:
+                    message_parts.append("You have no upcoming reservations.")
     
-#                 if include_past and past_stays:
-#                     message_parts.append(f"I also found {len(past_stays)} past stay(s).")
+                if include_past and past_stays:
+                    message_parts.append(f"I also found {len(past_stays)} past stay(s).")
     
-#                 return {
-#                     "found": True,
-#                     "upcomingReservation": upcoming_res,
-#                     "pastStays": past_stays,
-#                     "message": " ".join(message_parts)
-#                 }
+                return {
+                    "found": True,
+                    "upcomingReservation": upcoming_res,
+                    "pastStays": past_stays,
+                    "message": " ".join(message_parts)
+                }
     
-#             except Exception as e:
-#                 return {"error": str(e)}
+            except Exception as e:
+                return {"error": str(e)}
     
 #     def _execute_update_reservation(self, content_data):
 #             """
