@@ -606,14 +606,14 @@ class BedrockStreamManager:
             # Add tracking for in-progress tool calls
             self.pending_tool_tasks = {}
     
-#         def _initialize_client(self):
-#             """Initialize the Bedrock client."""
-#             config = Config(
-#                 endpoint_uri=f"https://bedrock-runtime.{self.region}.amazonaws.com",
-#                 region=self.region,
-#                 aws_credentials_identity_resolver=EnvironmentCredentialsResolver(),
-#             )
-#             self.bedrock_client = BedrockRuntimeClient(config=config)
+        def _initialize_client(self):
+            """Initialize the Bedrock client."""
+            config = Config(
+                endpoint_uri=f"https://bedrock-runtime.{self.region}.amazonaws.com",
+                region=self.region,
+                aws_credentials_identity_resolver=EnvironmentCredentialsResolver(),
+            )
+            self.bedrock_client = BedrockRuntimeClient(config=config)
     
 #         async def initialize_stream(self):
 #             """Initialize the bidirectional stream with Bedrock."""
