@@ -326,118 +326,118 @@ class ToolProcessor:
                 return {"error": str(e)}
 
 # ################################################################################################
-# class BedrockStreamManager:
-#         """Manages bidirectional streaming with AWS Bedrock using asyncio"""
+class BedrockStreamManager:
+        """Manages bidirectional streaming with AWS Bedrock using asyncio"""
     
-#         # Event templates
-#         START_SESSION_EVENT = """{
-#             "event": {
-#                 "sessionStart": {
-#                 "inferenceConfiguration": {
-#                     "maxTokens": 1024,
-#                     "topP": 0.9,
-#                     "temperature": 0.7
-#                     }
-#                 }
-#             }
-#         }"""
+        # Event templates
+        START_SESSION_EVENT = """{
+            "event": {
+                "sessionStart": {
+                "inferenceConfiguration": {
+                    "maxTokens": 1024,
+                    "topP": 0.9,
+                    "temperature": 0.7
+                    }
+                }
+            }
+        }"""
     
-#         CONTENT_START_EVENT = """{
-#             "event": {
-#                 "contentStart": {
-#                 "promptName": "%s",
-#                 "contentName": "%s",
-#                 "type": "AUDIO",
-#                 "interactive": true,
-#                 "role": "USER",
-#                 "audioInputConfiguration": {
-#                     "mediaType": "audio/lpcm",
-#                     "sampleRateHertz": 16000,
-#                     "sampleSizeBits": 16,
-#                     "channelCount": 1,
-#                     "audioType": "SPEECH",
-#                     "encoding": "base64"
-#                     }
-#                 }
-#             }
-#         }"""
+        CONTENT_START_EVENT = """{
+            "event": {
+                "contentStart": {
+                "promptName": "%s",
+                "contentName": "%s",
+                "type": "AUDIO",
+                "interactive": true,
+                "role": "USER",
+                "audioInputConfiguration": {
+                    "mediaType": "audio/lpcm",
+                    "sampleRateHertz": 16000,
+                    "sampleSizeBits": 16,
+                    "channelCount": 1,
+                    "audioType": "SPEECH",
+                    "encoding": "base64"
+                    }
+                }
+            }
+        }"""
     
-#         AUDIO_EVENT_TEMPLATE = """{
-#             "event": {
-#                 "audioInput": {
-#                 "promptName": "%s",
-#                 "contentName": "%s",
-#                 "content": "%s"
-#                 }
-#             }
-#         }"""
+        AUDIO_EVENT_TEMPLATE = """{
+            "event": {
+                "audioInput": {
+                "promptName": "%s",
+                "contentName": "%s",
+                "content": "%s"
+                }
+            }
+        }"""
     
-#         TEXT_CONTENT_START_EVENT = """{
-#             "event": {
-#                 "contentStart": {
-#                 "promptName": "%s",
-#                 "contentName": "%s",
-#                 "type": "TEXT",
-#                 "role": "%s",
-#                 "interactive": false,
-#                     "textInputConfiguration": {
-#                         "mediaType": "text/plain"
-#                     }
-#                 }
-#             }
-#         }"""
+        TEXT_CONTENT_START_EVENT = """{
+            "event": {
+                "contentStart": {
+                "promptName": "%s",
+                "contentName": "%s",
+                "type": "TEXT",
+                "role": "%s",
+                "interactive": false,
+                    "textInputConfiguration": {
+                        "mediaType": "text/plain"
+                    }
+                }
+            }
+        }"""
     
-#         TEXT_INPUT_EVENT = """{
-#             "event": {
-#                 "textInput": {
-#                 "promptName": "%s",
-#                 "contentName": "%s",
-#                 "content": "%s"
-#                 }
-#             }
-#         }"""
+        TEXT_INPUT_EVENT = """{
+            "event": {
+                "textInput": {
+                "promptName": "%s",
+                "contentName": "%s",
+                "content": "%s"
+                }
+            }
+        }"""
     
-#         TOOL_CONTENT_START_EVENT = """{
-#             "event": {
-#                 "contentStart": {
-#                     "promptName": "%s",
-#                     "contentName": "%s",
-#                     "interactive": false,
-#                     "type": "TOOL",
-#                     "role": "TOOL",
-#                     "toolResultInputConfiguration": {
-#                         "toolUseId": "%s",
-#                         "type": "TEXT",
-#                         "textInputConfiguration": {
-#                             "mediaType": "text/plain"
-#                         }
-#                     }
-#                 }
-#             }
-#         }"""
+        TOOL_CONTENT_START_EVENT = """{
+            "event": {
+                "contentStart": {
+                    "promptName": "%s",
+                    "contentName": "%s",
+                    "interactive": false,
+                    "type": "TOOL",
+                    "role": "TOOL",
+                    "toolResultInputConfiguration": {
+                        "toolUseId": "%s",
+                        "type": "TEXT",
+                        "textInputConfiguration": {
+                            "mediaType": "text/plain"
+                        }
+                    }
+                }
+            }
+        }"""
     
-#         CONTENT_END_EVENT = """{
-#             "event": {
-#                 "contentEnd": {
-#                 "promptName": "%s",
-#                 "contentName": "%s"
-#                 }
-#             }
-#         }"""
+        CONTENT_END_EVENT = """{
+            "event": {
+                "contentEnd": {
+                "promptName": "%s",
+                "contentName": "%s"
+                }
+            }
+        }"""
     
-#         PROMPT_END_EVENT = """{
-#             "event": {
-#                 "promptEnd": {
-#                 "promptName": "%s"
-#                 }
-#             }
-#         }"""
+        PROMPT_END_EVENT = """{
+            "event": {
+                "promptEnd": {
+                "promptName": "%s"
+                }
+            }
+        }"""
     
-#         SESSION_END_EVENT = """{
-#             "event": {
-#                 "sessionEnd": {}
-#             }
-#         }"""
+        SESSION_END_EVENT = """{
+            "event": {
+                "sessionEnd": {}
+            }
+        }"""
     
 #         def start_prompt(self):
 #             """Create a promptStart event"""
