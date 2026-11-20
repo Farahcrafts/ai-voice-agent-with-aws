@@ -330,6 +330,8 @@ class BedrockStreamManager:
         """Manages bidirectional streaming with AWS Bedrock using asyncio"""
     
         # Event templates
+
+        #Evenements de cycle de vie
         START_SESSION_EVENT = """{
             "event": {
                 "sessionStart": {
@@ -341,7 +343,47 @@ class BedrockStreamManager:
                 }
             }
         }"""
-    
+
+        PROMPT_END_EVENT = """{
+                    "event": {
+                        "promptEnd": {
+                        "promptName": "%s"
+                        }
+                    }
+                }"""
+
+        SESSION_END_EVENT = """{
+                    "event": {
+                        "sessionEnd": {}
+                    }
+                }"""
+            
+        #Evenements de contenu
+        TEXT_CONTENT_START_EVENT = """{
+                    "event": {
+                        "contentStart": {
+                        "promptName": "%s",
+                        "contentName": "%s",
+                        "type": "TEXT",
+                        "role": "%s",
+                        "interactive": false,
+                            "textInputConfiguration": {
+                                "mediaType": "text/plain"
+                            }
+                        }
+                    }
+                }"""
+
+        TEXT_INPUT_EVENT = """{
+                    "event": {
+                        "textInput": {
+                        "promptName": "%s",
+                        "contentName": "%s",
+                        "content": "%s"
+                        }
+                    }
+                }"""
+      
         CONTENT_START_EVENT = """{
             "event": {
                 "contentStart": {
@@ -371,32 +413,17 @@ class BedrockStreamManager:
                 }
             }
         }"""
-    
-        TEXT_CONTENT_START_EVENT = """{
-            "event": {
-                "contentStart": {
-                "promptName": "%s",
-                "contentName": "%s",
-                "type": "TEXT",
-                "role": "%s",
-                "interactive": false,
-                    "textInputConfiguration": {
-                        "mediaType": "text/plain"
+
+        CONTENT_END_EVENT = """{
+                    "event": {
+                        "contentEnd": {
+                        "promptName": "%s",
+                        "contentName": "%s"
+                        }
                     }
-                }
-            }
-        }"""
-    
-        TEXT_INPUT_EVENT = """{
-            "event": {
-                "textInput": {
-                "promptName": "%s",
-                "contentName": "%s",
-                "content": "%s"
-                }
-            }
-        }"""
-    
+                }"""
+            
+        #Evenements d'outils
         TOOL_CONTENT_START_EVENT = """{
             "event": {
                 "contentStart": {
@@ -415,30 +442,27 @@ class BedrockStreamManager:
                 }
             }
         }"""
-    
-        CONTENT_END_EVENT = """{
-            "event": {
-                "contentEnd": {
-                "promptName": "%s",
-                "contentName": "%s"
-                }
-            }
-        }"""
-    
-        PROMPT_END_EVENT = """{
-            "event": {
-                "promptEnd": {
-                "promptName": "%s"
-                }
-            }
-        }"""
-    
-        SESSION_END_EVENT = """{
-            "event": {
-                "sessionEnd": {}
-            }
-        }"""
-    
+
+        def tool_result_event(self, content_name, content, role):
+                    """Create a tool result event"""
+            
+                    if isinstance(content, dict):
+                        content_json_string = json.dumps(content)
+                    else:
+                        content_json_string = content
+            
+                    tool_result_event = {
+                        "event": {
+                            "toolResult": {
+                                "promptName": self.prompt_name,
+                                "contentName": content_name,
+                                "content": content_json_string,
+                            }
+                        }
+                    }
+                    return json.dumps(tool_result_event)
+            
+       #Evenement pour configurer l'ia
         def start_prompt(self):
             """Create a promptStart event"""
             guest_tool_schema = json.dumps(
@@ -550,38 +574,28 @@ class BedrockStreamManager:
     
             return json.dumps(prompt_start_event)
     
-        def tool_result_event(self, content_name, content, role):
-            """Create a tool result event"""
-    
-            if isinstance(content, dict):
-                content_json_string = json.dumps(content)
-            else:
-                content_json_string = content
-    
-            tool_result_event = {
-                "event": {
-                    "toolResult": {
-                        "promptName": self.prompt_name,
-                        "contentName": content_name,
-                        "content": content_json_string,
-                    }
-                }
-            }
-            return json.dumps(tool_result_event)
-    
+       #Constructeur
         def __init__(self, model_id="amazon.nova-sonic-v1:0", region="us-east-1"):
             """Initialize the stream manager."""
+
+            # nom de l'IA qu'on va utiliser
             self.model_id = model_id
+            #serveur AWS où on va se connecter
             self.region = region
-    
-            # Replace RxPy subjects with asyncio queues
+
+            #Queue où le micro dépose la voix avant qu'elle ne soit envoyée à AWS
             self.audio_input_queue = asyncio.Queue()
+            #Queue où AWS dépose la voix de l'IA avant qu'elle ne soit jouée par les haut-parleurs
             self.audio_output_queue = asyncio.Queue()
+            #Queue qui reçoit tous les messages bruts d'AWS (utile pour le débogage ou pour une interface visuelle)
             self.output_queue = asyncio.Queue()
-    
+
+            #Connexion réelle à AWS une fois initialize_stream lancee
             self.response_task = None
             self.stream_response = None
+            # passe à True quand la session avec AWS sera ouverte
             self.is_active = False
+            # Qd il passe à True, l'agent coupe sa propre voix
             self.barge_in = False
             self.bedrock_client = None
     
@@ -589,13 +603,17 @@ class BedrockStreamManager:
             self.audio_player = None
     
             # Text response components
+            #Un interrupteur pour savoir si on doit afficher le texte de l'IA dans la console
             self.display_assistant_text = False
+            #Stockera "USER" ou "ASSISTANT" pour savoir qui est en train de parler
             self.role = None
     
             # Session information
             self.prompt_name = str(uuid.uuid4())
             self.content_name = str(uuid.uuid4())
             self.audio_content_name = str(uuid.uuid4())
+
+            #Tools variables, stockent les details de la demende d'outil
             self.toolUseContent = ""
             self.toolUseId = ""
             self.toolName = ""
@@ -605,7 +623,8 @@ class BedrockStreamManager:
     
             # Add tracking for in-progress tool calls
             self.pending_tool_tasks = {}
-    
+
+        #Client d'AWS 
         def _initialize_client(self):
             """Initialize the Bedrock client."""
             config = Config(
@@ -614,7 +633,8 @@ class BedrockStreamManager:
                 aws_credentials_identity_resolver=EnvironmentCredentialsResolver(),
             )
             self.bedrock_client = BedrockRuntimeClient(config=config)
-    
+
+        #Initialiser le stream 
         async def initialize_stream(self):
             """Initialize the bidirectional stream with Bedrock."""
             if not self.bedrock_client:
@@ -698,7 +718,8 @@ class BedrockStreamManager:
                 self.is_active = False
                 print(f"Failed to initialize stream: {str(e)}")
                 raise
-    
+
+        #JSON-> Octets et l'envoie vers AWS
         async def send_raw_event(self, event_json):
             """Send a raw event JSON to the Bedrock stream."""
             if not self.stream_response or not self.is_active:
@@ -724,7 +745,8 @@ class BedrockStreamManager:
                     import traceback
     
                     traceback.print_exc()
-    
+
+        #utilise l'event CONTENT_START_EVENT
         async def send_audio_content_start_event(self):
             """Send a content start event to the Bedrock stream."""
             content_start_event = self.CONTENT_START_EVENT % (
@@ -732,7 +754,51 @@ class BedrockStreamManager:
                 self.audio_content_name,
             )
             await self.send_raw_event(content_start_event)
-    
+        #utilise l'event CONTENT_END_EVENT
+        async def send_audio_content_end_event(self):
+                    """Send a content end event to the Bedrock stream."""
+                    if not self.is_active:
+                        debug_print("Stream is not active")
+                        return
+            
+                    content_end_event = self.CONTENT_END_EVENT % (
+                        self.prompt_name,
+                        self.audio_content_name,
+                    )
+                    await self.send_raw_event(content_end_event)
+                    debug_print("Audio ended")
+        #utilise PROMPT_END_EVENT
+        async def send_prompt_end_event(self):
+                    """Close the stream and clean up resources."""
+                    if not self.is_active:
+                        debug_print("Stream is not active")
+                        return
+            
+                    prompt_end_event = self.PROMPT_END_EVENT % (self.prompt_name)
+                    await self.send_raw_event(prompt_end_event)
+                    debug_print("Prompt ended")
+        #utilise SESSION_END_EVENT
+        async def send_session_end_event(self):
+                    """Send a session end event to the Bedrock stream."""
+                    if not self.is_active:
+                        debug_print("Stream is not active")
+                        return
+            
+                    await self.send_raw_event(self.SESSION_END_EVENT)
+                    self.is_active = False
+                    debug_print("Session ended")
+            
+        #AudioStreamer l'appelle et depose le son dans audio_input_queue
+        def add_audio_chunk(self, audio_bytes):
+                    """Add an audio chunk to the queue."""
+                    self.audio_input_queue.put_nowait(
+                        {
+                            "audio_bytes": audio_bytes,
+                            "prompt_name": self.prompt_name,
+                            "content_name": self.audio_content_name,
+                        }
+                    )
+        #regarde dans audio_input_queue, convertit en texte, et appelle send_raw_event
         async def _process_audio_input(self):
             """Process audio input from the queue and send to Bedrock."""
             while self.is_active:
@@ -764,78 +830,99 @@ class BedrockStreamManager:
                         import traceback
     
                         traceback.print_exc()
-    
-        def add_audio_chunk(self, audio_bytes):
-            """Add an audio chunk to the queue."""
-            self.audio_input_queue.put_nowait(
-                {
-                    "audio_bytes": audio_bytes,
-                    "prompt_name": self.prompt_name,
-                    "content_name": self.audio_content_name,
-                }
-            )
-    
-        async def send_audio_content_end_event(self):
-            """Send a content end event to the Bedrock stream."""
-            if not self.is_active:
-                debug_print("Stream is not active")
-                return
-    
-            content_end_event = self.CONTENT_END_EVENT % (
-                self.prompt_name,
-                self.audio_content_name,
-            )
-            await self.send_raw_event(content_end_event)
-            debug_print("Audio ended")
-    
+
+        #l'ia demande l'outil, cette fct est appelee, cree des tasks
+        def handle_tool_request(self, tool_name, tool_content, tool_use_id):
+                            """Handle a tool request asynchronously"""
+                            # Create a unique content name for this tool response
+                            tool_content_name = str(uuid.uuid4())
+                    
+                            # Create an asynchronous task for the tool execution
+                            task = asyncio.create_task(
+                                self._execute_tool_and_send_result(
+                                    tool_name, tool_content, tool_use_id, tool_content_name
+                                )
+                            )
+                    
+                            # Store the task
+                            self.pending_tool_tasks[tool_content_name] = task
+                    
+                            # Add error handling
+                            task.add_done_callback(
+                                lambda t: self._handle_tool_task_completion(t, tool_content_name)
+                            )
+        #nettoie les tasks
+        def _handle_tool_task_completion(self, task, content_name):
+                    """Handle the completion of a tool task"""
+                    # Remove task from pending tasks
+                    if content_name in self.pending_tool_tasks:
+                        del self.pending_tool_tasks[content_name]
+            
+                    # Handle any exceptions
+                    if task.done() and not task.cancelled():
+                        exception = task.exception()
+                        if exception:
+                            debug_print(f"Tool task failed: {str(exception)}")
+        #appelle ToolProcessor pour chercher dans la bdd, utilise 3 fcts:
+        async def _execute_tool_and_send_result(
+                    self, tool_name, tool_content, tool_use_id, content_name
+                ):
+                    """Execute a tool and send the result"""
+                    try:
+                        debug_print(f"Starting tool execution: {tool_name}")
+            
+                        # Process the tool - this doesn't block the event loop
+                        tool_result = await self.tool_processor.process_tool_async(
+                            tool_name, tool_content
+                        )
+            
+                        # Send the result sequence
+                        await self.send_tool_start_event(content_name, tool_use_id)
+                        await self.send_tool_result_event(content_name, tool_result)
+                        await self.send_tool_content_end_event(content_name)
+            
+                        debug_print(f"Tool execution complete: {tool_name}")
+                    except Exception as e:
+                        debug_print(f"Error executing tool {tool_name}: {str(e)}")
+                        # Try to send an error response if possible
+                        try:
+                            error_result = {"error": f"Tool execution failed: {str(e)}"}
+            
+                            await self.send_tool_start_event(content_name, tool_use_id)
+                            await self.send_tool_result_event(content_name, error_result)
+                            await self.send_tool_content_end_event(content_name)
+                        except Exception as send_error:
+                            debug_print(f"Failed to send error response: {str(send_error)}")
+        #fct1: utilise TOOL_CONTENT_START_EVENT
         async def send_tool_start_event(self, content_name, tool_use_id):
-            """Send a tool content start event to the Bedrock stream."""
-            content_start_event = self.TOOL_CONTENT_START_EVENT % (
-                self.prompt_name,
-                content_name,
-                tool_use_id,
-            )
-            debug_print(f"Sending tool start event: {content_start_event}")
-            await self.send_raw_event(content_start_event)
-    
+                    """Send a tool content start event to the Bedrock stream."""
+                    content_start_event = self.TOOL_CONTENT_START_EVENT % (
+                        self.prompt_name,
+                        content_name,
+                        tool_use_id,
+                    )
+                    debug_print(f"Sending tool start event: {content_start_event}")
+                    await self.send_raw_event(content_start_event)
+        #fct2: utilise TOOL_RESULT_EVENT 
         async def send_tool_result_event(self, content_name, tool_result):
-            """Send a tool content event to the Bedrock stream."""
-            # Use the actual tool result from processToolUse
-            tool_result_event = self.tool_result_event(
-                content_name=content_name, content=tool_result, role="TOOL"
-            )
-            debug_print(f"Sending tool result event: {tool_result_event}")
-            await self.send_raw_event(tool_result_event)
-    
+                     """Send a tool content event to the Bedrock stream."""
+                     # Use the actual tool result from processToolUse
+                     tool_result_event = self.tool_result_event(
+                         content_name=content_name, content=tool_result, role="TOOL"
+                     )
+                     debug_print(f"Sending tool result event: {tool_result_event}")
+                     await self.send_raw_event(tool_result_event)
+        #fct3: utilise CONTENT_END_EVENT    
         async def send_tool_content_end_event(self, content_name):
-            """Send a tool content end event to the Bedrock stream."""
-            tool_content_end_event = self.CONTENT_END_EVENT % (
-                self.prompt_name,
-                content_name,
-            )
-            debug_print(f"Sending tool content event: {tool_content_end_event}")
-            await self.send_raw_event(tool_content_end_event)
-    
-        async def send_prompt_end_event(self):
-            """Close the stream and clean up resources."""
-            if not self.is_active:
-                debug_print("Stream is not active")
-                return
-    
-            prompt_end_event = self.PROMPT_END_EVENT % (self.prompt_name)
-            await self.send_raw_event(prompt_end_event)
-            debug_print("Prompt ended")
-    
-        async def send_session_end_event(self):
-            """Send a session end event to the Bedrock stream."""
-            if not self.is_active:
-                debug_print("Stream is not active")
-                return
-    
-            await self.send_raw_event(self.SESSION_END_EVENT)
-            self.is_active = False
-            debug_print("Session ended")
-    
+                    """Send a tool content end event to the Bedrock stream."""
+                    tool_content_end_event = self.CONTENT_END_EVENT % (
+                        self.prompt_name,
+                        content_name,
+                    )
+                    debug_print(f"Sending tool content event: {tool_content_end_event}")
+                    await self.send_raw_event(tool_content_end_event)
+            
+        #Ecoute tuyau AWS tjrs 
         async def _process_responses(self):
             """Process incoming responses from Bedrock."""
             try:
@@ -960,68 +1047,7 @@ class BedrockStreamManager:
             finally:
                 self.is_active = False
     
-        def handle_tool_request(self, tool_name, tool_content, tool_use_id):
-            """Handle a tool request asynchronously"""
-            # Create a unique content name for this tool response
-            tool_content_name = str(uuid.uuid4())
-    
-            # Create an asynchronous task for the tool execution
-            task = asyncio.create_task(
-                self._execute_tool_and_send_result(
-                    tool_name, tool_content, tool_use_id, tool_content_name
-                )
-            )
-    
-            # Store the task
-            self.pending_tool_tasks[tool_content_name] = task
-    
-            # Add error handling
-            task.add_done_callback(
-                lambda t: self._handle_tool_task_completion(t, tool_content_name)
-            )
-    
-        def _handle_tool_task_completion(self, task, content_name):
-            """Handle the completion of a tool task"""
-            # Remove task from pending tasks
-            if content_name in self.pending_tool_tasks:
-                del self.pending_tool_tasks[content_name]
-    
-            # Handle any exceptions
-            if task.done() and not task.cancelled():
-                exception = task.exception()
-                if exception:
-                    debug_print(f"Tool task failed: {str(exception)}")
-    
-        async def _execute_tool_and_send_result(
-            self, tool_name, tool_content, tool_use_id, content_name
-        ):
-            """Execute a tool and send the result"""
-            try:
-                debug_print(f"Starting tool execution: {tool_name}")
-    
-                # Process the tool - this doesn't block the event loop
-                tool_result = await self.tool_processor.process_tool_async(
-                    tool_name, tool_content
-                )
-    
-                # Send the result sequence
-                await self.send_tool_start_event(content_name, tool_use_id)
-                await self.send_tool_result_event(content_name, tool_result)
-                await self.send_tool_content_end_event(content_name)
-    
-                debug_print(f"Tool execution complete: {tool_name}")
-            except Exception as e:
-                debug_print(f"Error executing tool {tool_name}: {str(e)}")
-                # Try to send an error response if possible
-                try:
-                    error_result = {"error": f"Tool execution failed: {str(e)}"}
-    
-                    await self.send_tool_start_event(content_name, tool_use_id)
-                    await self.send_tool_result_event(content_name, error_result)
-                    await self.send_tool_content_end_event(content_name)
-                except Exception as send_error:
-                    debug_print(f"Failed to send error response: {str(send_error)}")
-    
+        #Nettoyage 
         async def close(self):
             """Close the stream properly."""
             if not self.is_active:
@@ -1044,10 +1070,13 @@ class BedrockStreamManager:
 # ################################################################################################
 class AudioStreamer:
         """Handles continuous microphone input and audio output using separate streams."""
-    
+
         def __init__(self, stream_manager):
+            #lien vers le cerveau (BedrockStreamManager)
             self.stream_manager = stream_manager
+            #S'il est sur True, le micro et les haut-parleurs sont actifs
             self.is_streaming = False
+            #event loop d'asyncio: chef d'orchestre
             self.loop = asyncio.get_event_loop()
     
             # Initialize PyAudio
@@ -1058,6 +1087,7 @@ class AudioStreamer:
             # Initialize separate streams for input and output
             # Input stream with callback for microphone
             debug_print("Opening input audio stream...")
+            #"tuyau" du micro
             self.input_stream = time_it(
                 "AudioStreamerOpenAudio",
                 lambda: self.p.open(
@@ -1073,6 +1103,7 @@ class AudioStreamer:
     
             # Output stream for direct writing (no callback)
             debug_print("Opening output audio stream...")
+            #"tuyau" des haut-parleurs 
             self.output_stream = time_it(
                 "AudioStreamerOpenAudio",
                 lambda: self.p.open(
@@ -1083,9 +1114,9 @@ class AudioStreamer:
                     frames_per_buffer=CHUNK_SIZE,
                 ),
             )
-    
             debug_print("output audio stream opened")
-    
+
+        #appellee par PyAudio qd le son est capte 
         def input_callback(self, in_data, frame_count, time_info, status):
             """Callback function that schedules audio processing in the asyncio event loop"""
             if self.is_streaming and in_data:
@@ -1094,7 +1125,8 @@ class AudioStreamer:
                     self.process_input_audio(in_data), self.loop
                 )
             return (None, pyaudio.paContinue)
-    
+
+        #capte le son attrape par input_callback, et l'envoie au stream_manager
         async def process_input_audio(self, audio_data):
             """Process a single audio chunk directly"""
             try:
@@ -1103,7 +1135,8 @@ class AudioStreamer:
             except Exception as e:
                 if self.is_streaming:
                     print(f"Error processing input audio: {e}")
-    
+
+        #recupere la voix de l'ia et la joue dans les haut-parleurs
         async def play_output_audio(self):
             """Play audio responses from Nova Sonic"""
             while self.is_streaming:
@@ -1160,7 +1193,8 @@ class AudioStreamer:
     
                         traceback.print_exc()
                     await asyncio.sleep(0.05)
-    
+
+        #previent AWS, lance la boucle de lecture et attend qu'on appuie sur entrer
         async def start_streaming(self):
             """Start streaming audio."""
             if self.is_streaming:
@@ -1183,6 +1217,7 @@ class AudioStreamer:
     
             # Start processing tasks
             # self.input_task = asyncio.create_task(self.process_input_audio())
+            #La tâche d'arrière-plan qui s'occupe de lire la voix de l'IA 
             self.output_task = asyncio.create_task(self.play_output_audio())
     
             # Wait for user to press Enter to stop
